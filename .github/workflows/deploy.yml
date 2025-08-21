@@ -1,0 +1,34 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      
+    - name: Create .env file from secrets
+      run: |
+        echo "LINE_CHANNEL_SECRET=${{ secrets.LINE_CHANNEL_SECRET }}" >> .env
+        echo "LINE_CHANNEL_TOKEN=${{ secrets.LINE_CHANNEL_TOKEN }}" >> .env
+        echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
+        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+        echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+        echo "RELATION_ACCESS_TOKEN=${{ secrets.RELATION_ACCESS_TOKEN }}" >> .env
+        echo "RELATION_SUBDOMAIN=${{ secrets.RELATION_SUBDOMAIN }}" >> .env
+        echo "RELATION_MESSAGE_BOX_ID=${{ secrets.RELATION_MESSAGE_BOX_ID }}" >> .env
+        echo "REPLY_STYLE=${{ secrets.REPLY_STYLE }}" >> .env
+        echo "NG_WORDS=${{ secrets.NG_WORDS }}" >> .env
+        echo "FLAG_PREFIX=${{ secrets.FLAG_PREFIX }}" >> .env
+        echo "TOP_K=${{ secrets.TOP_K }}" >> .env
+    
+    - name: Build and Deploy
+      run: |
+        # デプロイコマンド（Cloud Run等）

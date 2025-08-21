@@ -161,12 +161,23 @@ async def line_webhook(req: Request):
         raise HTTPException(403, "bad signature")
 
     data = json.loads(body.decode())
+    print(f"[LINE] Received webhook: {json.dumps(data, ensure_ascii=False)}")
+    
     for ev in data.get("events", []):
         if ev.get("type") == "message" and ev["message"]["type"] == "text":
-            ans = gen_reply(ev["message"]["text"])
+            user_msg = ev["message"]["text"]
+            print(f"[LINE] Processing message: {user_msg}")
+            
+            ans = gen_reply(user_msg)
+            print(f"[LINE] Generated reply: {ans}")
+            
+            token = os.getenv('LINE_CHANNEL_TOKEN','')
+            print(f"[LINE] Token exists: {bool(token)}")
+            
             async with httpx.AsyncClient(timeout=15) as c:
-                await c.post("https://api.line.me/v2/bot/message/reply",
-                    headers={"Authorization": f"Bearer {os.getenv('LINE_CHANNEL_TOKEN','')}"},
+                res = await c.post("https://api.line.me/v2/bot/message/reply",
+                    headers={"Authorization": f"Bearer {token}"},
                     json={"replyToken": ev["replyToken"],
                           "messages": [{"type": "text", "text": ans}]})
+                print(f"[LINE] Reply API response: {res.status_code} - {res.text}")
     return "ok"
